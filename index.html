@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mapbox DC Lunch 😋</title>
+  <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
+</head>
+<style>
+  h1 {
+    font-size: 2em;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+    font-weight: 700;
+  }
+
+  .c-header {
+    padding: 3em 1em;
+    text-align: center;
+  }
+
+  .c-map {
+    position: relative;
+    height: 500px;
+    width: 100%;
+  }
+</style>
+<body>
+  <div class="c-header">
+    <h1>🍔🌭🍕🌮🍝 near Mapbox</h1>
+  </div>
+  <div class="c-map" id="map"></div>
+</body>
+<script type="text/javascript">
+  L.mapbox.accessToken = 'pk.eyJ1IjoiYWxseXBhbGFuemkiLCJhIjoiY2l3ZG1ndmJmMDZybjJvb2J3MTJzazQwaSJ9.yXhNtLrHo7t5xBBcmfSxHA';
+  var map = L.mapbox.map('map', 'mapbox.streets');
+  map.setView([-77.03267779999999, 38.9131907], 15);
+
+  // Build a marker from a simple GeoJSON object:
+  var marker = L.mapbox.featureLayer({
+      type: 'Feature',
+      geometry: {
+          type: 'Point',
+          coordinates: [-77.03267779999999, 38.9131907]
+      },
+      properties: {
+          title: 'Mapbox Office!',
+          'marker-color': '#f86767'
+      }
+  }).addTo(map);
+
+  // Iterate over the featureLayer we've called "marker"
+  // and open its popup instead of clicking to trigger it.
+  marker.eachLayer(function(m) {
+    m.openPopup();
+  });
+</script>
+</html>
