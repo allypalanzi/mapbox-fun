@@ -3,6 +3,7 @@
 <head>
   <title>Mapbox DC Lunch 😋</title>
   <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+  <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
   <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
 </head>
 <style>
@@ -32,7 +33,18 @@
 <script type="text/javascript">
   L.mapbox.accessToken = 'pk.eyJ1IjoiYWxseXBhbGFuemkiLCJhIjoiY2l3ZG1ndmJmMDZybjJvb2J3MTJzazQwaSJ9.yXhNtLrHo7t5xBBcmfSxHA';
   var map = L.mapbox.map('map', 'mapbox.streets');
-  map.setView([-77.03267779999999, 38.9131907], 15);
+
+  // Set view to be Mapbox area
+  map.setView([38.9131907, -77.03267779999999], 15);
+
+  var colorDefault = '#ed6498',
+      colorGood    = '#ff0000',
+      colorBad     = '#ff0000',
+      colorOk      = '#ff0000';
+
+  // Import Foursquare Data
+
+  // Map it into a GeoJSON object
 
   // Build a marker from a simple GeoJSON object:
   var marker = L.mapbox.featureLayer({
@@ -43,14 +55,48 @@
       },
       properties: {
           title: 'Mapbox Office!',
-          'marker-color': '#f86767'
+          'marker-color': colorDefault
       }
   }).addTo(map);
 
-  // Iterate over the featureLayer we've called "marker"
-  // and open its popup instead of clicking to trigger it.
-  marker.eachLayer(function(m) {
-    m.openPopup();
-  });
+  // Create a Foursquare developer account: https://developer.foursquare.com/
+// NOTE: CHANGE THESE VALUES TO YOUR OWN:
+// Otherwise they can be cycled or deactivated with zero notice.
+var CLIENT_ID = 'JIOLJU0WK1WJ3YHI3I2KFIJUVXLTKEFZ0WV0T3OCALBNUM0M';
+var CLIENT_SECRET = 'HMF0OAO0LZFC1E2NQ2KJN3J53YOMU20OKM3MPFIFZ4JNBVZ4';
+
+// https://developer.foursquare.com/start/search
+var API_ENDPOINT = 'https://api.foursquare.com/v2/venues/search' +
+  '?near=Washington,DC' +
+  '&client_id=' + CLIENT_ID +
+  '&client_secret=' + CLIENT_SECRET +
+  '&v=20130815' +
+  '&categoryId=4d4b7105d754a06374d81259' +
+  '&callback=?';
+
+// Keep our place markers organized in a nice group.
+var foursquarePlaces = L.layerGroup().addTo(map);
+
+// Use jQuery to make an AJAX request to Foursquare to load markers data.
+$.getJSON(API_ENDPOINT, function(result, status) {
+
+    if (status !== 'success') return alert('Request to Foursquare failed');
+
+    // Transform each venue result into a marker on the map.
+    for (var i = 0; i < result.response.venues.length; i++) {
+      var venue = result.response.venues[i];
+      var latlng = L.latLng(venue.location.lat, venue.location.lng);
+      var marker = L.marker(latlng, {
+          icon: L.mapbox.marker.icon({
+            'marker-color': colorGood
+          })
+        })
+      .bindPopup('<strong><a href="https://foursquare.com/v/' + venue.id + '">' +
+        venue.name + '</a></strong>')
+        .addTo(foursquarePlaces);
+    }
+
+});
+
 </script>
 </html>
