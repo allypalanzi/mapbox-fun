@@ -3,7 +3,6 @@
 <head>
   <title>Mapbox DC Lunch 😋</title>
   <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
-  <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
   <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
 </head>
 <style>
@@ -30,73 +29,61 @@
   </div>
   <div class="c-map" id="map"></div>
 </body>
-<script type="text/javascript">
+<script>
+
   L.mapbox.accessToken = 'pk.eyJ1IjoiYWxseXBhbGFuemkiLCJhIjoiY2l3ZG1ndmJmMDZybjJvb2J3MTJzazQwaSJ9.yXhNtLrHo7t5xBBcmfSxHA';
   var map = L.mapbox.map('map', 'mapbox.streets');
+  var DEFAULT_COLOR = '#ed6498';
+  var CLIENT_ID = 'JIOLJU0WK1WJ3YHI3I2KFIJUVXLTKEFZ0WV0T3OCALBNUM0M';
+  var CLIENT_SECRET = 'HMF0OAO0LZFC1E2NQ2KJN3J53YOMU20OKM3MPFIFZ4JNBVZ4';
+  var API_ENDPOINT = 'https://api.foursquare.com/v2/venues/explore' +
+    '?ll=38.9131907,-77.03267779999999' +
+    '&client_id=' + CLIENT_ID +
+    '&client_secret=' + CLIENT_SECRET +
+    '&section=food' +
+    '&v=20161206';
 
-  // Set view to be Mapbox area
+  // Set view to be Mapbox's office area
   map.setView([38.9131907, -77.03267779999999], 15);
 
-  var colorDefault = '#ed6498',
-      colorGood    = '#ff0000',
-      colorBad     = '#ff0000',
-      colorOk      = '#ff0000';
-
-  // Import Foursquare Data
-
-  // Map it into a GeoJSON object
-
-  // Build a marker from a simple GeoJSON object:
-  var marker = L.mapbox.featureLayer({
-      type: 'Feature',
-      geometry: {
-          type: 'Point',
-          coordinates: [-77.03267779999999, 38.9131907]
-      },
-      properties: {
-          title: 'Mapbox Office!',
-          'marker-color': colorDefault
-      }
+  // Add a Mapbox marker to the map
+  var mapboxMarker = L.mapbox.featureLayer({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [-77.03267779999999, 38.9131907]
+    },
+    properties: {
+      title: 'Mapbox Office!',
+      'marker-color': DEFAULT_COLOR
+    }
   }).addTo(map);
 
-  // Create a Foursquare developer account: https://developer.foursquare.com/
-// NOTE: CHANGE THESE VALUES TO YOUR OWN:
-// Otherwise they can be cycled or deactivated with zero notice.
-var CLIENT_ID = 'JIOLJU0WK1WJ3YHI3I2KFIJUVXLTKEFZ0WV0T3OCALBNUM0M';
-var CLIENT_SECRET = 'HMF0OAO0LZFC1E2NQ2KJN3J53YOMU20OKM3MPFIFZ4JNBVZ4';
+  // Open Mapbox marker on load
+  mapboxMarker.eachLayer(function(m) {
+    m.openPopup();
+  });
 
-// https://developer.foursquare.com/start/search
-var API_ENDPOINT = 'https://api.foursquare.com/v2/venues/search' +
-  '?near=Washington,DC' +
-  '&client_id=' + CLIENT_ID +
-  '&client_secret=' + CLIENT_SECRET +
-  '&v=20130815' +
-  '&categoryId=4d4b7105d754a06374d81259' +
-  '&callback=?';
-
-// Keep our place markers organized in a nice group.
-var foursquarePlaces = L.layerGroup().addTo(map);
-
-// Use jQuery to make an AJAX request to Foursquare to load markers data.
-$.getJSON(API_ENDPOINT, function(result, status) {
-
-    if (status !== 'success') return alert('Request to Foursquare failed');
-
-    // Transform each venue result into a marker on the map.
-    for (var i = 0; i < result.response.venues.length; i++) {
-      var venue = result.response.venues[i];
-      var latlng = L.latLng(venue.location.lat, venue.location.lng);
-      var marker = L.marker(latlng, {
+  // Fetch data, convert to json
+  fetch(API_ENDPOINT).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      var venues = data.response.groups[0].items;
+      // Turn venues into markers
+      for (var i = 0; i < venues.length; i++) {
+        var venue = venues[i].venue;
+        var latlng = L.latLng(venue.location.lat, venue.location.lng);
+        var color = venue.ratingColor;
+        L.marker(latlng, {
           icon: L.mapbox.marker.icon({
-            'marker-color': colorGood
+            'marker-color': '#' + color
           })
         })
-      .bindPopup('<strong><a href="https://foursquare.com/v/' + venue.id + '">' +
-        venue.name + '</a></strong>')
-        .addTo(foursquarePlaces);
-    }
-
-});
-
+        // Add names & links to popups
+        .bindPopup('<strong><a href="https://foursquare.com/v/' + venue.id + '">' + venue.name + '</a></strong>').addTo(map);
+      }
+    }).catch(function() {
+      alert('Error getting data, sorry :(');
+    });
 </script>
 </html>
