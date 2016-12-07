@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Mapbox DC Eats 😋</title>
+  <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
   <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
 </head>
 <style>
@@ -70,25 +71,24 @@
   });
 
   // Fetch data, convert to json
-  fetch(API_ENDPOINT).then(function(response) {
-      return response.json();
-    }).then(function(data) {
-      var venues = data.response.groups[0].items;
-      // Turn venues into markers
-      for (var i = 0; i < venues.length; i++) {
-        var venue = venues[i].venue;
-        var latlng = L.latLng(venue.location.lat, venue.location.lng);
-        var color = venue.ratingColor;
-        L.marker(latlng, {
+
+  $.getJSON(API_ENDPOINT, function(result, status) {
+    if (status !== 'success') return alert('Request to Foursquare failed');
+    // Transform each venue result into a marker on the map.
+    var venues = result.response.groups[0].items;
+    for (var i = 0; i < venues.length; i++) {
+      var venue = venues[i].venue;
+      var latlng = L.latLng(venue.location.lat, venue.location.lng);
+      var color = venue.ratingColor;
+      L.marker(latlng, {
           icon: L.mapbox.marker.icon({
             'marker-color': '#' + color
           })
         })
-        // Add names & links to popups
-        .bindPopup('<strong><a href="https://foursquare.com/v/' + venue.id + '">' + venue.name + '</a></strong>').addTo(map);
-      }
-    }).catch(function() {
-      alert('Error getting data, sorry :(');
-    });
+      .bindPopup('<strong><a href="https://foursquare.com/v/' + venue.id + '">' +
+        venue.name + '</a></strong>')
+        .addTo(map);
+    }
+  });
 </script>
 </html>
