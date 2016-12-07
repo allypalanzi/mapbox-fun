@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapbox DC Lunch 😋</title>
-  <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+  <title>Mapbox DC Eats 😋</title>
   <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
 </head>
 <style>
@@ -10,27 +9,32 @@
     font-size: 2em;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
     font-weight: 700;
+    margin: 0;
   }
 
   .c-header {
-    padding: 3em 1em;
     text-align: center;
+    position: absolute;
+    z-index: 1000000;
+    background: rgba(255,255,255, .8);
+    padding: 1em 2em;
+    right: 0;
   }
 
   .c-map {
     position: relative;
-    height: 500px;
+    height: 100vh;
     width: 100%;
   }
 </style>
 <body>
   <div class="c-header">
-    <h1>🍔🌭🍕🌮🍝 near Mapbox</h1>
+    <h1>🍔🌭🍕mapbox eats🌮🍝😋</h1>
   </div>
   <div class="c-map" id="map"></div>
 </body>
+<script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
 <script>
-
   L.mapbox.accessToken = 'pk.eyJ1IjoiYWxseXBhbGFuemkiLCJhIjoiY2l3ZG1ndmJmMDZybjJvb2J3MTJzazQwaSJ9.yXhNtLrHo7t5xBBcmfSxHA';
   var map = L.mapbox.map('map', 'mapbox.streets');
   var DEFAULT_COLOR = '#ed6498';
@@ -51,6 +55,7 @@
     type: 'Feature',
     geometry: {
       type: 'Point',
+      // if u accidentally swap these coordinates they are in antarctica
       coordinates: [-77.03267779999999, 38.9131907]
     },
     properties: {
